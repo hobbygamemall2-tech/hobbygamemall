@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>하비게임몰 통합 이벤트 센터</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { font-family: 'Noto Sans KR', sans-serif; background-color: #f1f5f9; }
+        .scrollbar-none::-webkit-scrollbar { display: none; }
+        .scrollbar-none { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+</head>
+<body class="max-w-md mx-auto min-h-screen shadow-2xl bg-white flex flex-col justify-between">
+
+    <div id="user-view" class="flex-1 flex flex-col justify-between">
+        <header class="bg-slate-900 text-white p-5 sticky top-0 z-40 rounded-b-2xl shadow-md border-b-2 border-amber-400">
+            <div class="flex justify-between items-center mb-1">
+                <h1 class="text-xl font-black tracking-wider text-amber-400">HOBBY GAME MALL</h1>
+                <button onclick="showAdminModal()" class="text-slate-400 hover:text-white text-xs bg-slate-800 px-2.5 py-1 rounded-md border border-slate-700">
+                    <i class="fa-solid fa-lock mr-1"></i>관리자
+                </button>
+            </div>
+            <p class="text-[11px] text-slate-400 font-medium">매장 테이블 QR 스캔 전용 이벤트 신청 센터</p>
+        </header>
+
+        <main class="p-4 flex-1 space-y-5">
+            <section class="bg-slate-100 p-1 rounded-xl flex border border-slate-200">
+                <button onclick="switchBranch('bucheon')" id="tab-bucheon" class="w-1/2 py-2 text-center text-xs font-black rounded-lg transition-all bg-slate-950 text-amber-400 shadow-sm">
+                    <i class="fa-solid fa-shop mr-1.5"></i>부천 본점
+                </button>
+                <button onclick="switchBranch('seoul')" id="tab-seoul" class="w-1/2 py-2 text-center text-xs font-bold rounded-lg transition-all text-slate-500 hover:text-slate-800">
+                    <i class="fa-solid fa-building-flag mr-1.5"></i>서울 매장 (70평형)
+                </button>
+            </section>
+
+            <section>
+                <div class="flex justify-between items-center mb-2">
+                    <h3 class="text-[11px] font-bold text-slate-500 uppercase tracking-wider">TCG 종목 필터</h3>
+                    <span class="text-[10px] text-slate-400"><i class="fa-solid fa-arrows-left-right mr-1"></i>스와이프</span>
+                </div>
+                <div class="flex space-x-1.5 overflow-x-auto pb-2 scrollbar-none" id="game-filter-container"></div>
+            </section>
+
+            <section class="space-y-4">
+                <div class="flex justify-between items-center border-b border-slate-100 pb-1.5">
+                    <h3 class="text-xs font-black text-slate-800"><i class="fa-regular fa-calendar-days mr-1.5 text-amber-500"></i>주간 통합 캘린더</h3>
+                    <span id="current-branch-text" class="text-[11px] bg-amber-50 text-amber-800 px-2 py-0.5 rounded-md font-bold">부천 본점</span>
+                </div>
+                <div id="calendar-board" class="space-y-4"></div>
+            </section>
+        </main>
+
+        <footer class="bg-slate-50 border-t border-slate-200 p-4 text-center space-y-2 rounded-t-xl sticky bottom-0 z-30 shadow-inner">
+            <a href="https://open.kakao.com/" target="_blank" class="bg-[#FEE500] text-[#3A1D1D] text-xs font-black p-3 rounded-xl flex items-center justify-center shadow-sm hover:opacity-90 transition-all">
+                <i class="fa-solid fa-comment mr-2 text-base"></i>하비게임몰 공식 오픈채팅방 합류하기
+            </a>
+            <p class="text-[9px] text-slate-400 font-medium">본 주소를 그대로 QR코드로 인쇄하여 매장에 부착하세요.</p>
+        </footer>
+    </div>
+
+    <div id="admin-view" class="hidden flex-1 flex flex-col justify-between bg-slate-50">
+        <header class="bg-slate-900 text-white p-5 sticky top-0 z-40 rounded-b-2xl shadow-md border-b-2 border-red-500">
+            <div class="flex justify-between items-center">
+                <h1 class="text-base font-black text-red-400"><i class="fa-solid fa-toolbox mr-1.5"></i>하비게임몰 관리자 모드</h1>
+                <button onclick="logoutAdmin()" class="text-white text-xs bg-red-600 px-3 py-1 rounded-md font-bold">로그아웃</button>
+            </div>
+        </header>
+
+        <main class="p-4 flex-1 space-y-6">
+            <section class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 space-y-3">
+                <h3 class="text-xs font-black text-slate-800 border-b pb-2"><i class="fa-solid fa-circle-plus mr-1.5 text-blue-500"></i>신규 캘린더 리그 개설</h3>
+                <div class="grid grid-cols-2 gap-2">
+                    <div>
+                        <label class="block text-[11px] font-bold text-slate-500 mb-1">개설 지점</label>
+                        <select id="form-branch" class="w-full text-xs p-2 border rounded-md bg-slate-50 font-medium">
+                            <option value="bucheon">부천 본점</option>
+                            <option value="seoul">서울 매장</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-bold text-slate-500 mb-1">TCG 종목</label>
+                        <select id="form-game" class="w-full text-xs p-2 border rounded-md bg-slate-50 font-medium"></select>
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                    <div>
+                        <label class="block text-[11px] font-bold text-slate-500 mb-1">요일 선택</label>
+                        <select id="form-day" class="w-full text-xs p-2 border rounded-md bg-slate-50 font-medium">
+                            <option value="월요일">월요일</option><option value="화요일">화요일</option><option value="수요일">수요일</option>
+                            <option value="목요일">목요일</option><option value="금요일">금요일</option><option value="토요일">토요일</option><option value="일요일">일요일</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-bold text-slate-500 mb-1">시작 시간</label>
+                        <input type="text" id="form-time" placeholder="예: 19:30" class="w-full text-xs p-2 border rounded-md">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-[11px] font-bold text-slate-500 mb-1">대회/리그 명칭</label>
+                    <input type="text" id="form-title" placeholder="예: 로르카나 토요 정기 리그전" class="w-full text-xs p-2 border rounded-md">
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                    <div>
+                        <label class="block text-[11px] font-bold text-slate-500 mb-1">참가비</label>
+                        <input type="text" id="form-fee" placeholder="예: 10,000원" class="w-full text-xs p-2 border rounded-md">
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-bold text-slate-500 mb-1">정원 제한</label>
+                        <input type="text" id="form-capacity" placeholder="예: 32명 선착순" class="w-full text-xs p-2 border rounded-md">
+                    </div>
+                </div>
+                <button onclick="createNewEvent()" class="w-full bg-slate-950 text-amber-400 font-black text-xs p-3 rounded-lg shadow-sm">달력에 일정 등록하기</button>
+            </section>
+
+            <section class="space-y-2">
+                <h3 class="text-xs font-black text-slate-800"><i class="fa-solid fa-list-check mr-1.5 text-slate-500"></i>등록된 일정 삭제 관리</h3>
+                <div id="admin-event-list" class="space-y-2"></div>
+            </section>
+        </main>
+    </div>
+
+    <div id="admin-modal" class="hidden fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
+        <div class="bg-white w-full max-w-xs rounded-xl p-5 space-y-4 shadow-2xl">
+            <div class="text-center">
+                <i class="fa-solid fa-shield-halved text-3xl text-slate-900 mb-2"></i>
+                <h3 class="font-black text-sm text-slate-900">매장 관리자 인증</h3>
+            </div>
+            <input type="password" id="admin-password" placeholder="기본 비밀번호: 1234" class="w-full text-center text-sm p-2.5 border rounded-lg tracking-widest">
+            <div class="flex space-x-2">
+                <button onclick="closeAdminModal()" class="w-1/2 bg-slate-100 text-slate-600 text-xs font-bold py-2.5 rounded-lg">취소</button>
+                <button onclick="loginAdmin()" class="w-1/2 bg-slate-950 text-amber-400 text-xs font-black py-2.5 rounded-lg">인증</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="join-modal" class="hidden fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
+        <div class="bg-white w-full max-w-xs rounded-xl p-5 space-y-4 shadow-2xl">
+            <div class="text-center">
+                <i class="fa-solid fa-signature text-3xl text-amber-500 mb-2"></i>
+                <h3 class="font-black text-sm text-slate-900" id="join-modal-title">리그 참가 신청 명단</h3>
+            </div>
+            <input type="text" id="join-username" placeholder="이름 또는 닉네임 입력" class="w-full text-center text-xs p-2.5 border rounded-lg">
+            <div class="flex space-x-2">
+                <button onclick="closeJoinModal()" class="w-1/2 bg-slate-100 text-slate-600 text-xs font-bold py-2.5 rounded-lg">닫기</button>
+                <button onclick="submitJoin()" class="w-1/2 bg-slate-950 text-white text-xs font-black py-2.5 rounded-lg">등록</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const gameNames = { mtg: '매직 더 개더링', commander: 'MTG 커맨더', fab: 'Flesh and Blood', grandarchive: '그랜드 아카이브', starwars: '스타워즈 미니어처', starwars_rivals: '스타워즈 니벨아레나', lorcana: '디즈니 로르카나', onepiece: '원피스 TCG', cookierun: '쿠키런 킹덤', digimon: '디지몬 TCG', ultraman: '울트라맨 카드게임', hololive: '홀로라이브 오피셜', lovelive: '러브라이브 스쿨아이돌', vanguard: '카드파이트!! 뱅가드', conan: '명탐정 코난 TCG' };
+        const daysOfWeek = ['월요일', '화요일', '수요일', '목요일', '금요일', '토요일', '일요일'];
+
+        let eventData = JSON.parse(localStorage.getItem('HGM_STATIC_EVENTS')) || [
+            { id: 1, branch: 'bucheon', game: 'lorcana', day: '수요일', time: '19:30', title: '디즈니 로르카나 주간 정기 리그', fee: '10,000원', capacity: '32명 선착순', participants: ['유저A', '유저B'] },
+            { id: 2, branch: 'bucheon', game: 'grandarchive', day: '토요일', time: '14:00', title: '그랜드 아카이브 매장 공인 리그전', fee: '15,000원', capacity: '24명 제한', participants: ['유저C'] }
+        ];
+
+        let currentBranch = 'bucheon'; let currentGame = 'all'; let targetEventId = null;
+        function saveStorage() { localStorage.setItem('HGM_STATIC_EVENTS', JSON.stringify(eventData)); }
+
+        function initFilters() {
+            const container = document.getElementById('game-filter-container');
+            const select = document.getElementById('form-game');
+            container.innerHTML = `<button onclick="filterGame('all')" class="game-btn active bg-slate-950 text-white text-xs font-bold px-4 py-2 rounded-full whitespace-nowrap shadow-sm">전체보기</button>`;
+            select.innerHTML = '';
+            for (const [key, name] of Object.entries(gameNames)) {
+                container.innerHTML += `<button onclick="filterGame('${key}')" class="game-btn bg-slate-50 text-slate-700 border border-slate-200 text-xs font-semibold px-4 py-2 rounded-full whitespace-nowrap hover:bg-slate-100">${name}</button>`;
+                select.innerHTML += `<option value="${key}">${name}</option>`;
+            }
+        }
+
+        function renderCalendar() {
+            const container = document.getElementById('calendar-board'); container.innerHTML = '';
+            daysOfWeek.forEach(day => {
+                const dayEvents = eventData.filter(e => e.branch === currentBranch && e.day === day && (currentGame === 'all' || e.game === currentGame));
+                const daySection = document.createElement('div'); daySection.className = "bg-slate-50 border border-slate-200/60 rounded-xl p-3 space-y-2.5";
+                const isWeekend = day === '토요일' || day === '일요일';
+                const dayColorClass = isWeekend ? 'text-red-600 bg-red-50' : 'text-slate-800 bg-slate-200/70';
+                daySection.innerHTML = `<div class="text-xs font-black px-2.5 py-1 rounded-md inline-block ${dayColorClass}">${day}</div>`;
+                const cardContainer = document.createElement('div'); cardContainer.className = "space-y-2";
+
+                if (dayEvents.length === 0) { cardContainer.innerHTML = `<div class="text-[11px] text-slate-400 pl-1 py-1">예정된 리그 일정이 없습니다.</div>`; } 
+                else {
+                    dayEvents.sort((a,b) => a.time.localeCompare(b.time)).forEach(e => {
+                        const count = e.participants ? e.participants.length : 0;
+                        const names = count > 0 ? e.participants.join(', ') : '신청자 없음';
+                        cardContainer.innerHTML += `
+                            <div class="bg-white border border-slate-200 rounded-lg p-3 shadow-sm space-y-2">
+                                <div class="flex justify-between items-center">
+                                    <div class="flex items-center space-x-1.5">
+                                        <span class="bg-slate-900 text-amber-400 text-[9px] font-black px-2 py-0.5 rounded">${gameNames[e.game]}</span>
+                                        <span class="text-slate-900 text-xs font-bold"><i class="fa-regular fa-clock mr-1 text-amber-500"></i>${e.time}</span>
+                                    </div>
+                                    <span class="bg-blue-50 text-blue-700 text-[10px] font-bold px-1.5 py-0.5 rounded">현재 카운트: ${count}명</span>
+                                </div>
+                                <h4 class="font-extrabold text-slate-800 text-xs">${e.title}</h4>
+                                <div class="text-[11px] text-slate-500 bg-slate-50 p-2 rounded border border-slate-100">
+                                    <b>비용:</b> ${e.fee} | <b>정원:</b> ${e.capacity}
+                                    <div class="pt-1 mt-1 border-t border-slate-200/60"><b>명단:</b> <span class="text-slate-800 font-medium">${names}</span></div>
+                                </div>
+                                <button onclick="openJoinModal(${e.id}, '${e.title}')" class="w-full bg-slate-950 hover:bg-amber-500 hover:text-slate-950 text-white text-[11px] font-bold py-1.5 rounded transition-all">이름 올리기 (참가의사 밝히기)</button>
+                            </div>`;
+                    });
+                }
+                daySection.appendChild(cardContainer); container.appendChild(daySection);
+            });
+        }
+
+        function renderAdminEvents() {
+            const container = document.getElementById('admin-event-list'); container.innerHTML = '';
+            if(eventData.length === 0) { container.innerHTML = `<div class="text-center py-6 text-xs text-slate-400">등록된 일정 없음</div>`; return; }
+            eventData.forEach(e => {
+                container.innerHTML += `
+                    <div class="bg-white p-2.5 rounded-lg border border-slate-200 flex justify-between items-center text-xs">
+                        <div><span class="bg-slate-100 text-slate-600 text-[9px] font-bold px-1 rounded">${e.branch === 'bucheon' ? '부천' : '서울'} | ${e.day} ${e.time}</span><h4 class="font-bold text-slate-800 mt-0.5">${e.title}</h4></div>
+                        <button onclick="deleteEvent(${e.id})" class="bg-red-50 text-red-600 px-2.5 py-1.5 rounded"><i class="fa-regular fa-trash-can"></i></button>
+                    </div>`;
+            });
+        }
+
+        function switchBranch(branch) {
+            currentBranch = branch; document.getElementById('current-branch-text').innerText = branch === 'bucheon' ? '부천 본점' : '서울 매장';
+            const btnB = document.getElementById('tab-bucheon'); const btnS = document.getElementById('tab-seoul');
+            btnB.className = branch === 'bucheon' ? "w-1/2 py-2 text-center text-xs font-black rounded-lg bg-slate-950 text-amber-400 shadow-sm" : "w-1/2 py-2 text-center text-xs font-bold rounded-lg text-slate-500 hover:text-slate-800";
+            btnS.className = branch === 'seoul' ? "w-1/2 py-2 text-center text-xs font-black rounded-lg bg-slate-950 text-amber-400 shadow-sm" : "w-1/2 py-2 text-center text-xs font-bold rounded-lg text-slate-500 hover:text-slate-800";
+            renderCalendar();
+        }
+
+        function filterGame(game) {
+            currentGame = game; const buttons = document.querySelectorAll('.game-btn');
+            buttons.forEach(btn => btn.className = "game-btn bg-slate-50 text-slate-700 border border-slate-200 text-xs font-semibold px-4 py-2 rounded-full whitespace-nowrap hover:bg-slate-100");
+            event.target.className = "game-btn active bg-slate-950 text-white text-xs font-bold px-4 py-2 rounded-full whitespace-nowrap shadow-sm";
+            renderCalendar();
+        }
+
+        function showAdminModal() { document.getElementById('admin-modal').classList.remove('hidden'); }
+        function closeAdminModal() { document.getElementById('admin-modal').classList.add('hidden'); document.getElementById('admin-password').value = ''; }
+        function loginAdmin() { if(document.getElementById('admin-password').value === '1234') { closeAdminModal(); document.getElementById('user-view').classList.add('hidden'); document.getElementById('admin-view').classList.remove('hidden'); renderAdminEvents(); } else { alert('오류'); } }
+        function logoutAdmin() { document.getElementById('admin-view').classList.add('hidden'); document.getElementById('user-view').classList.remove('hidden'); renderCalendar(); }
+
+        function createNewEvent() {
+            const branch = document.getElementById('form-branch').value; const game = document.getElementById('form-game').value; const day = document.getElementById('form-day').value;
+            const time = document.getElementById('form-time').value.trim(); const title = document.getElementById('form-title').value.trim(); const fee = document.getElementById('form-fee').value.trim(); const capacity = document.getElementById('form-capacity').value.trim();
+            if(!time || !title || !fee || !capacity) return;
+            eventData.push({ id: Date.now(), branch, game, day, time, title, fee, capacity, participants: [] });
+            saveStorage(); renderAdminEvents();
+            document.getElementById('form-time').value = ''; document.getElementById('form-title').value = ''; document.getElementById('form-fee').value = ''; document.getElementById('form-capacity').value = '';
+            alert('등록 완료');
+        }
+
+        function deleteEvent(id) { if(confirm('삭제하시겠습니까?')) { eventData = eventData.filter(e => e.id !== id); saveStorage(); renderAdminEvents(); } }
+        function openJoinModal(id, title) { targetEventId = id; document.getElementById('join-modal-title').innerText = title; document.getElementById('join-modal').classList.remove('hidden'); }
+        function closeJoinModal() { document.getElementById('join-modal').classList.add('hidden'); document.getElementById('join-username').value = ''; targetEventId = null; }
+        
+        function submitJoin() {
+            const name = document.getElementById('join-username').value.trim(); if(!name) return;
+            const idx = eventData.findIndex(e => e.id === targetEventId);
+            if(idx !== -1) {
+                if(!eventData[idx].participants.includes(name)) { eventData[idx].participants.push(name); saveStorage(); renderCalendar(); }
+                closeJoinModal(); alert('등록 완료');
+            }
+        }
+
+        initFilters(); renderCalendar();
+    </script>
+</body>
+</html>
